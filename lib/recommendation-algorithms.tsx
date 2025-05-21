@@ -47,7 +47,6 @@ export const recommendationAlgorithms: Recommendation[] = [
           ? caSaturation.result
           : Number.parseFloat(caSaturation.result as string);
 
-      // Check if soil is acidic and calcium saturation is below threshold
       return phValue < 6.5 && caValue < 65;
     },
     calculate: (data: SoilDataItem[]) => {
@@ -60,7 +59,6 @@ export const recommendationAlgorithms: Recommendation[] = [
           ? caSaturation.result
           : Number.parseFloat(caSaturation.result as string);
 
-      // Calculate lime requirement: (65 - Ca saturation) * 0.1 * 200
       return Math.round((65 - caValue) * 0.1 * 200);
     },
   },
@@ -85,7 +83,6 @@ export const recommendationAlgorithms: Recommendation[] = [
           ? caSaturation.result
           : Number.parseFloat(caSaturation.result as string);
 
-      // Check if soil is alkaline and calcium saturation is below threshold
       return phValue > 7.6 && caValue < 65;
     },
     calculate: (data: SoilDataItem[]) => {
@@ -98,8 +95,77 @@ export const recommendationAlgorithms: Recommendation[] = [
           ? caSaturation.result
           : Number.parseFloat(caSaturation.result as string);
 
-      // Calculate gypsum requirement: (65 - Ca saturation) * 0.1 * 250
       return Math.round((65 - caValue) * 0.1 * 250);
+    },
+  },
+  {
+    id: "dap-application-alkali",
+    title: "DAP Application",
+    description: "Apply DAP",
+    unit: "kg/ac",
+    condition: (data: SoilDataItem[]) => {
+      const ph = findParameter(data, "pH");
+      const phosphorus = findParameter(data, "Available Phosphorus");
+
+      if (!ph || !phosphorus) return false;
+
+      const phValue =
+        typeof ph.result === "number"
+          ? ph.result
+          : Number.parseFloat(ph.result as string);
+      const phosVal =
+        typeof phosphorus.result === "number"
+          ? phosphorus.result
+          : Number.parseFloat(phosphorus.result as string);
+
+      return phValue < 7.6 && phosVal < 15;
+    },
+    calculate: (data: SoilDataItem[]) => {
+      const phosphorus = findParameter(data, "Available Phosphorus");
+
+      if (!phosphorus) return null;
+
+      const phosValue =
+        typeof phosphorus.result === "number"
+          ? phosphorus.result
+          : Number.parseFloat(phosphorus.result as string);
+
+      return Math.round((100 - phosValue) * 25);
+    },
+  },
+  {
+    id: "dap-application-acidic",
+    title: "DAP Application",
+    description: "Apply DAP",
+    unit: "kg/ac",
+    condition: (data: SoilDataItem[]) => {
+      const ph = findParameter(data, "pH");
+      const phosphorus = findParameter(data, "Available Phosphorus");
+
+      if (!ph || !phosphorus) return false;
+
+      const phValue =
+        typeof ph.result === "number"
+          ? ph.result
+          : Number.parseFloat(ph.result as string);
+      const phosVal =
+        typeof phosphorus.result === "number"
+          ? phosphorus.result
+          : Number.parseFloat(phosphorus.result as string);
+
+      return phValue > 7.6 && phosVal < 15;
+    },
+    calculate: (data: SoilDataItem[]) => {
+      const phosphorus = findParameter(data, "Available Phosphorus");
+
+      if (!phosphorus) return null;
+
+      const phosValue =
+        typeof phosphorus.result === "number"
+          ? phosphorus.result
+          : Number.parseFloat(phosphorus.result as string);
+
+      return Math.round((15 - phosValue) * 25);
     },
   },
 ];
